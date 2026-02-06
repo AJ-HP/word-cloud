@@ -1,11 +1,49 @@
 const { useState, useEffect, useRef } = React;
 
-// Setup Lucide React Icons for browser environment
-const { 
-  MessageSquare, BarChart2, X, ThumbsUp, Check, Play, 
-  Plus, ArrowRight, Monitor, Smartphone, Hash, Trash2, 
-  Archive, Activity, Star, Heart, Shield, Menu, MoreVertical
-} = LucideReact;
+// Simple inline SVG icon components
+const Icon = ({ d, size = 24, className = '', fill = 'none', strokeWidth = 2 }) => (
+  React.createElement('svg', { 
+    width: size, height: size, viewBox: '0 0 24 24', 
+    fill: fill, stroke: 'currentColor', strokeWidth: strokeWidth,
+    strokeLinecap: 'round', strokeLinejoin: 'round', className 
+  }, React.createElement('path', { d }))
+);
+
+const MessageSquare = (props) => Icon({ ...props, d: 'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z' });
+const BarChart2 = (props) => React.createElement('svg', { width: props.size || 24, height: props.size || 24, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round', className: props.className },
+  React.createElement('line', { x1: 18, y1: 20, x2: 18, y2: 10 }),
+  React.createElement('line', { x1: 12, y1: 20, x2: 12, y2: 4 }),
+  React.createElement('line', { x1: 6, y1: 20, x2: 6, y2: 14 })
+);
+const X = (props) => React.createElement('svg', { width: props.size || 24, height: props.size || 24, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round', className: props.className },
+  React.createElement('line', { x1: 18, y1: 6, x2: 6, y2: 18 }),
+  React.createElement('line', { x1: 6, y1: 6, x2: 18, y2: 18 })
+);
+const ThumbsUp = (props) => Icon({ ...props, d: 'M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3' });
+const Check = (props) => Icon({ ...props, d: 'M20 6 9 17l-5-5' });
+const Play = (props) => Icon({ ...props, d: 'M5 3l14 9-14 9V3z', fill: props.fill || 'none' });
+const Plus = (props) => React.createElement('svg', { width: props.size || 24, height: props.size || 24, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round', className: props.className },
+  React.createElement('line', { x1: 12, y1: 5, x2: 12, y2: 19 }),
+  React.createElement('line', { x1: 5, y1: 12, x2: 19, y2: 12 })
+);
+const ArrowRight = (props) => React.createElement('svg', { width: props.size || 24, height: props.size || 24, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round', className: props.className },
+  React.createElement('line', { x1: 5, y1: 12, x2: 19, y2: 12 }),
+  React.createElement('polyline', { points: '12 5 19 12 12 19' })
+);
+const Monitor = (props) => Icon({ ...props, d: 'M20 3H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zM8 21h8M12 17v4' });
+const Smartphone = (props) => Icon({ ...props, d: 'M17 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zM12 18h.01' });
+const Hash = (props) => React.createElement('svg', { width: props.size || 24, height: props.size || 24, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round', className: props.className },
+  React.createElement('line', { x1: 4, y1: 9, x2: 20, y2: 9 }),
+  React.createElement('line', { x1: 4, y1: 15, x2: 20, y2: 15 }),
+  React.createElement('line', { x1: 10, y1: 3, x2: 8, y2: 21 }),
+  React.createElement('line', { x1: 16, y1: 3, x2: 14, y2: 21 })
+);
+const Archive = (props) => React.createElement('svg', { width: props.size || 24, height: props.size || 24, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round', className: props.className },
+  React.createElement('polyline', { points: '21 8 21 21 3 21 3 8' }),
+  React.createElement('rect', { x: 1, y: 3, width: 22, height: 5 }),
+  React.createElement('line', { x1: 10, y1: 12, x2: 14, y2: 12 })
+);
+const Activity = (props) => Icon({ ...props, d: 'M22 12h-4l-3 9L9 3l-3 9H2' });
 
 // --- HPG Design System Components ---
 
