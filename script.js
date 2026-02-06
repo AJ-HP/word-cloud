@@ -176,11 +176,28 @@ function App() {
     setView('event');
   };
 
-  const joinEvent = (code, userRole = 'participant') => {
+  const joinEvent = async (code, userRole = 'participant') => {
     if (events[code]) {
       setCurrentEventCode(code);
       setRole(userRole);
       setView('event');
+    } else if (database) {
+      // Event not in local state - query Firebase directly
+      try {
+        const snapshot = await database.ref(`events/${code}`).once('value');
+        const eventData = snapshot.val();
+        if (eventData) {
+          setEvents(prev => ({ ...prev, [code]: eventData }));
+          setCurrentEventCode(code);
+          setRole(userRole);
+          setView('event');
+        } else {
+          alert("Session not found. Try code '2024' for the Town Hall.");
+        }
+      } catch (err) {
+        console.error('Firebase lookup failed:', err);
+        alert("Session not found. Try code '2024' for the Town Hall.");
+      }
     } else {
       alert("Session not found. Try code '2024' for the Town Hall.");
     }
