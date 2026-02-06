@@ -1,11 +1,11 @@
 const { useState, useEffect, useRef } = React;
 
-// Setup Lucide Icons for browser environment
+// Setup Lucide React Icons for browser environment
 const { 
   MessageSquare, BarChart2, X, ThumbsUp, Check, Play, 
   Plus, ArrowRight, Monitor, Smartphone, Hash, Trash2, 
   Archive, Activity, Star, Heart, Shield, Menu, MoreVertical
-} = lucide;
+} = LucideReact;
 
 // --- HPG Design System Components ---
 
