@@ -81,43 +81,99 @@ const Badge = ({ children, variant = 'neutral' }) => {
 
 // --- Main Application ---
 
+// ========================================
+// FIREBASE CONFIGURATION
+// Replace with your own Firebase project config from:
+// https://console.firebase.google.com/ -> Project Settings -> Your apps -> Config
+// ========================================
+const firebaseConfig = {
+  apiKey: "AIzaSyCj0C8CZ-1qg9YGY7DsZ304z3PML-RlA_Y",
+  authDomain: "hpg-live.firebaseapp.com",
+  databaseURL: "https://hpg-live-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "hpg-live",
+  storageBucket: "hpg-live.firebasestorage.app",
+  messagingSenderId: "23829631693",
+  appId: "1:23829631693:web:e6990e57e26dd738f4cf84"
+};
+
+// Initialize Firebase
+let database = null;
+try {
+  firebase.initializeApp(firebaseConfig);
+  database = firebase.database();
+} catch (e) {
+  console.warn('Firebase initialization failed:', e);
+}
+
+const defaultEvents = {
+  '2024': {
+    code: '2024',
+    title: 'HPG Quarterly Town Hall',
+    created: new Date().toISOString(),
+    questions: [
+      { id: 1, text: "When will the new clinical training modules be available on the Academy?", author: "Dr. Evans", likes: 18, answered: false, created: Date.now() - 100000 },
+      { id: 2, text: "Great to see the new mental health initiatives. Are these available for remote staff too?", author: "Sarah J.", likes: 12, answered: false, created: Date.now() },
+      { id: 3, text: "Can you clarify the new OH referral process mentioned?", author: "Anonymous", likes: 5, answered: true, created: Date.now() - 200000 },
+    ],
+    activePoll: null,
+    polls: [
+      {
+        id: 'p1',
+        type: 'choice',
+        question: "How would you rate your current wellbeing balance?",
+        options: [
+          { id: 'o1', text: "Thriving 🌟", votes: 42 },
+          { id: 'o2', text: "Managing well 👍", votes: 35 },
+          { id: 'o3', text: "Could use support 🤝", votes: 12 },
+        ],
+        totalVotes: 89,
+        status: 'draft' 
+      }
+    ]
+  }
+};
+
 function App() {
   const [view, setView] = useState('landing'); 
   const [role, setRole] = useState('participant'); 
   const [currentEventCode, setCurrentEventCode] = useState(null);
-  
-  const [events, setEvents] = useState({
-    '2024': {
-      code: '2024',
-      title: 'HPG Quarterly Town Hall',
-      created: new Date().toISOString(),
-      questions: [
-        { id: 1, text: "When will the new clinical training modules be available on the Academy?", author: "Dr. Evans", likes: 18, answered: false, created: Date.now() - 100000 },
-        { id: 2, text: "Great to see the new mental health initiatives. Are these available for remote staff too?", author: "Sarah J.", likes: 12, answered: false, created: Date.now() },
-        { id: 3, text: "Can you clarify the new OH referral process mentioned?", author: "Anonymous", likes: 5, answered: true, created: Date.now() - 200000 },
-      ],
-      activePoll: null,
-      polls: [
-        {
-          id: 'p1',
-          type: 'choice',
-          question: "How would you rate your current wellbeing balance?",
-          options: [
-            { id: 'o1', text: "Thriving 🌟", votes: 42 },
-            { id: 'o2', text: "Managing well 👍", votes: 35 },
-            { id: 'o3', text: "Could use support 🤝", votes: 12 },
-          ],
-          totalVotes: 89,
-          status: 'draft' 
-        }
-      ]
+  const [events, setEvents] = useState(defaultEvents);
+  const [firebaseReady, setFirebaseReady] = useState(false);
+
+  // Subscribe to Firebase for real-time sync across devices
+  useEffect(() => {
+    if (!database) {
+      console.warn('Firebase not configured. Running in local-only mode.');
+      return;
     }
-  });
+
+    const eventsRef = database.ref('events');
+    
+    // Listen for real-time updates
+    eventsRef.on('value', (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        setEvents(prev => ({ ...defaultEvents, ...data }));
+      }
+      setFirebaseReady(true);
+    });
+
+    // Cleanup listener on unmount
+    return () => eventsRef.off();
+  }, []);
+
+  // Helper to save event to Firebase
+  const saveEventToFirebase = (code, eventData) => {
+    if (database) {
+      database.ref(`events/${code}`).set(eventData);
+    }
+  };
 
   const createEvent = (title) => {
     const code = Math.floor(1000 + Math.random() * 9000).toString();
     const newEvent = { code, title: title || 'Untitled Session', created: new Date().toISOString(), questions: [], activePoll: null, polls: [] };
     setEvents(prev => ({ ...prev, [code]: newEvent }));
+    saveEventToFirebase(code, newEvent);
     setCurrentEventCode(code);
     setRole('host');
     setView('event');
@@ -139,7 +195,11 @@ function App() {
   };
 
   const updateEventData = (code, updates) => {
-    setEvents(prev => ({ ...prev, [code]: { ...prev[code], ...updates } }));
+    setEvents(prev => {
+      const updated = { ...prev, [code]: { ...prev[code], ...updates } };
+      saveEventToFirebase(code, updated[code]);
+      return updated;
+    });
   };
 
   const currentEvent = events[currentEventCode];
