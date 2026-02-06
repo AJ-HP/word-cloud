@@ -81,26 +81,18 @@ const Badge = ({ children, variant = 'neutral' }) => {
 
 // --- Main Application ---
 
-// ========================================
-// FIREBASE CONFIGURATION
-// Replace with your own Firebase project config from:
-// https://console.firebase.google.com/ -> Project Settings -> Your apps -> Config
-// ========================================
-const firebaseConfig = {
-  apiKey: "AIzaSyCj0C8CZ-1qg9YGY7DsZ304z3PML-RlA_Y",
-  authDomain: "hpg-live.firebaseapp.com",
-  databaseURL: "https://hpg-live-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "hpg-live",
-  storageBucket: "hpg-live.firebasestorage.app",
-  messagingSenderId: "23829631693",
-  appId: "1:23829631693:web:e6990e57e26dd738f4cf84"
-};
+// Firebase config loaded from config.js (see config.example.js for template)
+const firebaseConfig = window.FIREBASE_CONFIG;
 
 // Initialize Firebase
 let database = null;
 try {
-  firebase.initializeApp(firebaseConfig);
-  database = firebase.database();
+  if (firebaseConfig && firebaseConfig.apiKey !== "YOUR_API_KEY") {
+    firebase.initializeApp(firebaseConfig);
+    database = firebase.database();
+  } else {
+    console.warn('Firebase not configured. Copy config.example.js to config.js and add your credentials.');
+  }
 } catch (e) {
   console.warn('Firebase initialization failed:', e);
 }
@@ -156,6 +148,9 @@ function App() {
         setEvents(prev => ({ ...defaultEvents, ...data }));
       }
       setFirebaseReady(true);
+    }, (error) => {
+      console.error('Firebase read failed:', error);
+      // Continue with local-only mode
     });
 
     // Cleanup listener on unmount
@@ -165,7 +160,9 @@ function App() {
   // Helper to save event to Firebase
   const saveEventToFirebase = (code, eventData) => {
     if (database) {
-      database.ref(`events/${code}`).set(eventData);
+      database.ref(`events/${code}`).set(eventData).catch(err => {
+        console.error('Firebase write failed:', err);
+      });
     }
   };
 
